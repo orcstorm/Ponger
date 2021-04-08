@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace TestGame
+namespace Pong
 {
-    public class Game1 : Game
+    public class PongGame : Game
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -22,7 +22,7 @@ namespace TestGame
         bool ballVDirection;
         List<SoundEffect> soundEffects;
 
-        public Game1()
+        public PongGame()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
@@ -50,7 +50,6 @@ namespace TestGame
             ballTexture = Content.Load<Texture2D>("orange_square");
             paddleTexture = Content.Load<Texture2D>("paddle");
             rightPaddleTexture = Content.Load<Texture2D>("paddle");
-            // TODO: use this.Content to load your game content here
         }
 
         protected override void Update(GameTime gameTime)
@@ -107,7 +106,7 @@ namespace TestGame
             if (ballPosition.Y <= 0)
             {
                 ballVDirection = false;
-                soundEffects[0].Play();
+                soundEffects[1].Play();
             }
             else if (ballPosition.Y >= _graphics.PreferredBackBufferHeight)
             {
