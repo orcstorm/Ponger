@@ -1,4 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -16,22 +18,29 @@ namespace TestGame
         Vector2 rightPaddlePosition;
         float ballSpeed;
         float paddleSpeed;
+        bool ballHDirection;
+        bool ballVDirection;
+        List<SoundEffect> soundEffects;
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
+            soundEffects = new List<SoundEffect>();
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            ballHDirection = true;
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 500f;
+            ballSpeed = 400f;
             paddlePosition = new Vector2(0, _graphics.PreferredBackBufferHeight / 2);
             paddleSpeed = 1000f;
             rightPaddlePosition = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight / 2);
+            soundEffects.Add(Content.Load < SoundEffect >("ping"));
+            soundEffects.Add(Content.Load<SoundEffect>("pong"));
             base.Initialize();
         }
 
@@ -59,13 +68,12 @@ namespace TestGame
             if (kstate.IsKeyDown(Keys.S))
                 paddlePosition.Y += paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             
-            //right paddle position
             if (paddlePosition.Y > _graphics.PreferredBackBufferHeight - paddleTexture.Height / 2)
                 paddlePosition.Y = _graphics.PreferredBackBufferHeight - paddleTexture.Height / 2;
             else if (paddlePosition.Y < paddleTexture.Height / 2)
                 paddlePosition.Y = paddleTexture.Height / 2;
 
-            //ball position
+            //right paddle position
             if (kstate.IsKeyDown(Keys.Up))
                 rightPaddlePosition.Y -= paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -77,13 +85,44 @@ namespace TestGame
             else if (rightPaddlePosition.Y < rightPaddleTexture.Height / 2)
                 rightPaddlePosition.Y = rightPaddleTexture.Height / 2;
 
-            ballPosition.X -= (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
-            ballPosition.Y += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2f;
+            //ball X position
+            //check for collision with border, and if so reverse the direction
+            if (ballPosition.X <= paddleTexture.Width)
+            {
+                ballHDirection = false;
+                soundEffects[0].Play();
+            } else if(ballPosition.X >= _graphics.PreferredBackBufferWidth - paddleTexture.Width) {
+                ballHDirection = true;
+                soundEffects[0].Play();
+            }
 
-            if (ballPosition.Y > _graphics.PreferredBackBufferHeight - ballTexture.Height / 2)
-                ballPosition.Y = _graphics.PreferredBackBufferHeight - ballTexture.Height / 2;
-            else if (ballPosition.Y < ballTexture.Height / 2)
-                ballPosition.Y = ballTexture.Height / 2;
+            //move the ball
+            if (ballHDirection == true) {
+                ballPosition.X -= (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+            } else {
+                ballPosition.X += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+            }
+
+            //Ball Y position
+            if (ballPosition.Y <= 0)
+            {
+                ballVDirection = false;
+                soundEffects[0].Play();
+            }
+            else if (ballPosition.Y >= _graphics.PreferredBackBufferHeight)
+            {
+                ballVDirection = true;
+                soundEffects[1].Play();
+            }
+
+            if (ballVDirection == true)
+            {
+                ballPosition.Y -= (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+            }
+            else
+            {
+                ballPosition.Y += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+            }
 
             base.Update(gameTime);
         }
@@ -135,4 +174,5 @@ namespace TestGame
             base.Draw(gameTime);
         }
     }
+
 }
