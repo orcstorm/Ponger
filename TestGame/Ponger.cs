@@ -41,6 +41,7 @@ namespace Pong
             rightPaddlePosition = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight / 2);
             soundEffects.Add(Content.Load < SoundEffect >("ping"));
             soundEffects.Add(Content.Load<SoundEffect>("pong"));
+            soundEffects.Add(Content.Load<SoundEffect>("goal"));
             base.Initialize();
         }
 
@@ -85,14 +86,16 @@ namespace Pong
                 rightPaddlePosition.Y = rightPaddleTexture.Height / 2;
 
             //ball X position
-            //check for collision with border, and if so reverse the direction
-            if (ballPosition.X <= paddleTexture.Width)
+            //check for collision with paddle, and if so reverse the direction
+
+            //check for a goal
+            if (ballPosition.X < 0 || ballPosition.X > _graphics.PreferredBackBufferWidth)
             {
-                ballHDirection = false;
-                soundEffects[0].Play();
-            } else if(ballPosition.X >= _graphics.PreferredBackBufferWidth - paddleTexture.Width) {
-                ballHDirection = true;
-                soundEffects[0].Play();
+                //play a goal sound
+                soundEffects[2].Play();
+                //move ball to the middle of the screen
+                ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
+                ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
             }
 
             //move the ball
@@ -106,7 +109,7 @@ namespace Pong
             if (ballPosition.Y <= 0)
             {
                 ballVDirection = false;
-                soundEffects[1].Play();
+                soundEffects[0].Play();
             }
             else if (ballPosition.Y >= _graphics.PreferredBackBufferHeight)
             {

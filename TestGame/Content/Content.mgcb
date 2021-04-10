@@ -13,6 +13,12 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin goal.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:goal.wav
+
 #begin orange_square.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -42,6 +48,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:ping.wav
+
+#begin plink.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:plink.wav
 
 #begin pong.wav
 /importer:WavImporter
