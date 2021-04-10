@@ -42,6 +42,7 @@ namespace Pong
             soundEffects.Add(Content.Load < SoundEffect >("ping"));
             soundEffects.Add(Content.Load<SoundEffect>("pong"));
             soundEffects.Add(Content.Load<SoundEffect>("goal"));
+            soundEffects.Add(Content.Load<SoundEffect>("plink"));
             base.Initialize();
         }
 
@@ -86,7 +87,35 @@ namespace Pong
                 rightPaddlePosition.Y = rightPaddleTexture.Height / 2;
 
             //ball X position
-            //check for collision with paddle, and if so reverse the direction
+            //check for collision with left paddle, and if so reverse the direction
+            if((ballPosition.Y <= paddlePosition.Y + paddleTexture.Height / 2) && (ballPosition.Y >= paddlePosition.Y - paddleTexture.Height ))
+            {
+                if(ballPosition.X <= paddleTexture.Width)
+                {
+                    soundEffects[3].Play();
+                    ballHDirection = false;
+                }
+            }
+
+            //check for a left goal
+            if (ballPosition.X < 0 || ballPosition.X > _graphics.PreferredBackBufferWidth)
+            {
+                //play a goal sound
+                soundEffects[2].Play();
+                //move ball to the middle of the screen
+                ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
+                ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
+            }
+
+            //check for collision with right paddle, and if so reverse the direction
+            if ((ballPosition.Y <= rightPaddlePosition.Y + rightPaddleTexture.Height / 2) && (ballPosition.Y >= rightPaddlePosition.Y - rightPaddleTexture.Height))
+            {
+                if (ballPosition.X >= _graphics.PreferredBackBufferWidth - rightPaddleTexture.Width)
+                {
+                    soundEffects[3].Play();
+                    ballHDirection = true;
+                }
+            }
 
             //check for a goal
             if (ballPosition.X < 0 || ballPosition.X > _graphics.PreferredBackBufferWidth)
