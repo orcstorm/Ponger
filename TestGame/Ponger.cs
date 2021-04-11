@@ -31,6 +31,8 @@ namespace Pong
         Texture2D leftScoreTexture;
         Vector2 rightScorePosition;
         Texture2D rightScoreTexture;
+        float Ydivisor;
+        Random rand;
 
         public PongGame()
         {
@@ -46,7 +48,7 @@ namespace Pong
             // TODO: Add your initialization logic here
             ballHDirection = true;
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 400f;
+            ballSpeed = 2000f;
             paddlePosition = new Vector2(0, _graphics.PreferredBackBufferHeight / 2);
             paddleSpeed = 1000f;
             rightPaddlePosition = new Vector2(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight / 2);
@@ -62,8 +64,10 @@ namespace Pong
             scoreCards.Add(Content.Load<Texture2D>("three"));
             winningScore = 3;
             leftScorePosition = new Vector2(5, 5);
-            rightScorePosition = new Vector2(_graphics.PreferredBackBufferWidth - 40, 5);
+            rightScorePosition = new Vector2(_graphics.PreferredBackBufferWidth, 5);
             isGameWon = false;
+            rand = new Random();
+            Ydivisor = (float)(rand.NextDouble() * 4d);
 
             base.Initialize();
         }
@@ -87,10 +91,10 @@ namespace Pong
             var kstate = Keyboard.GetState();
 
             //left paddle position
-            if (kstate.IsKeyDown(Keys.W))
+            if (kstate.IsKeyDown(Keys.Up))
                 paddlePosition.Y -= paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (kstate.IsKeyDown(Keys.S))
+            if (kstate.IsKeyDown(Keys.Down))
                 paddlePosition.Y += paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             
             if (paddlePosition.Y > _graphics.PreferredBackBufferHeight - paddleTexture.Height / 2)
@@ -99,24 +103,21 @@ namespace Pong
                 paddlePosition.Y = paddleTexture.Height / 2;
 
             //right paddle position
-            if (kstate.IsKeyDown(Keys.Up))
-                rightPaddlePosition.Y -= paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            rightPaddlePosition.Y = ballPosition.Y;
 
-            if (kstate.IsKeyDown(Keys.Down))
-                rightPaddlePosition.Y += paddleSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (rightPaddlePosition.Y > _graphics.PreferredBackBufferHeight - paddleTexture.Height / 2)
+                rightPaddlePosition.Y = _graphics.PreferredBackBufferHeight - paddleTexture.Height / 2;
+            else if (rightPaddlePosition.Y < paddleTexture.Height / 2)
+                rightPaddlePosition.Y = paddleTexture.Height / 2;
 
-            if (rightPaddlePosition.Y > _graphics.PreferredBackBufferHeight - rightPaddleTexture.Height / 2)
-                rightPaddlePosition.Y = _graphics.PreferredBackBufferHeight - rightPaddleTexture.Height / 2;
-            else if (rightPaddlePosition.Y < rightPaddleTexture.Height / 2)
-                rightPaddlePosition.Y = rightPaddleTexture.Height / 2;
-
-            //ball X position
+            //ball Xposition
             //check for collision with left paddle, and if so reverse the direction
-            if((ballPosition.Y <= paddlePosition.Y + paddleTexture.Height / 2) && (ballPosition.Y >= paddlePosition.Y - paddleTexture.Height ))
+            if ((ballPosition.Y <= paddlePosition.Y + paddleTexture.Height / 2) && (ballPosition.Y >= paddlePosition.Y - paddleTexture.Height ))
             {
                 if(ballPosition.X <= paddleTexture.Width)
                 {
                     soundEffects[3].Play();
+                    Ydivisor = (float)rand.NextDouble() * 2.0f;
                     ballHDirection = false;
                 }
             }
@@ -128,12 +129,12 @@ namespace Pong
                 soundEffects[2].Play();
 
                 //increment the score
-                leftPaddleScore = rightPaddleScore + 1;
-                leftScoreTexture = scoreCards[leftPaddleScore];
+                rightPaddleScore = rightPaddleScore + 1;
+                rightScoreTexture = scoreCards[rightPaddleScore];
 
                 //move ball to the middle of the screen
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
-                ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
+                ballPosition.Y = (float)(rand.NextDouble()) * _graphics.PreferredBackBufferHeight;
             }
 
             //check for collision with right paddle, and if so reverse the direction
@@ -142,6 +143,7 @@ namespace Pong
                 if (ballPosition.X >= _graphics.PreferredBackBufferWidth - rightPaddleTexture.Width)
                 {
                     soundEffects[3].Play();
+                    Ydivisor = (float)rand.NextDouble() * 2.0f;
                     ballHDirection = true;
                 }
             }
@@ -151,11 +153,11 @@ namespace Pong
             {
                 //play a goal sound
                 soundEffects[2].Play();
-                rightPaddleScore = rightPaddleScore + 1;
-                rightScoreTexture = scoreCards[rightPaddleScore];
+                leftPaddleScore = leftPaddleScore + 1;
+                leftScoreTexture = scoreCards[leftPaddleScore];
                 //move ball to the middle of the screen
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
-                ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
+                ballPosition.Y = (float)(rand.NextDouble()) * _graphics.PreferredBackBufferHeight;
             }
 
             //move the ball
@@ -179,11 +181,11 @@ namespace Pong
 
             if (ballVDirection == true)
             {
-                ballPosition.Y -= (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+                ballPosition.Y -= (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / (Ydivisor * 2.0f + 2.0f);
             }
             else
             {
-                ballPosition.Y += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+                ballPosition.Y += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / (Ydivisor * 2.0f + 2.0f);
             }
 
 
@@ -250,7 +252,7 @@ namespace Pong
                 null,
                 Color.White,
                 0f,
-                new Vector2(0, 0),
+                new Vector2(rightPaddleTexture.Width + 5, 0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
