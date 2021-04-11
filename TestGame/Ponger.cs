@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace Pong
 {
@@ -21,6 +22,15 @@ namespace Pong
         bool ballHDirection;
         bool ballVDirection;
         List<SoundEffect> soundEffects;
+        bool isGameWon;
+        int leftPaddleScore;
+        int rightPaddleScore;
+        int winningScore;
+        List<Texture2D> scoreCards;
+        Vector2 leftScorePosition;
+        Texture2D leftScoreTexture;
+        Vector2 rightScorePosition;
+        Texture2D rightScoreTexture;
 
         public PongGame()
         {
@@ -28,6 +38,7 @@ namespace Pong
             Content.RootDirectory = "Content";
             IsMouseVisible = false;
             soundEffects = new List<SoundEffect>();
+            scoreCards = new List<Texture2D>();
         }
 
         protected override void Initialize()
@@ -43,6 +54,17 @@ namespace Pong
             soundEffects.Add(Content.Load<SoundEffect>("pong"));
             soundEffects.Add(Content.Load<SoundEffect>("goal"));
             soundEffects.Add(Content.Load<SoundEffect>("plink"));
+            leftPaddleScore = 0;
+            rightPaddleScore = 0;
+            scoreCards.Add(Content.Load<Texture2D>("zero"));
+            scoreCards.Add(Content.Load<Texture2D>("one"));
+            scoreCards.Add(Content.Load<Texture2D>("two"));
+            scoreCards.Add(Content.Load<Texture2D>("three"));
+            winningScore = 3;
+            leftScorePosition = new Vector2(5, 5);
+            rightScorePosition = new Vector2(_graphics.PreferredBackBufferWidth - 40, 5);
+            isGameWon = false;
+
             base.Initialize();
         }
 
@@ -52,6 +74,8 @@ namespace Pong
             ballTexture = Content.Load<Texture2D>("orange_square");
             paddleTexture = Content.Load<Texture2D>("paddle");
             rightPaddleTexture = Content.Load<Texture2D>("paddle");
+            leftScoreTexture = scoreCards[0];
+            rightScoreTexture = scoreCards[0];
         }
 
         protected override void Update(GameTime gameTime)
@@ -98,10 +122,15 @@ namespace Pong
             }
 
             //check for a left goal
-            if (ballPosition.X < 0 || ballPosition.X > _graphics.PreferredBackBufferWidth)
+            if (ballPosition.X < 0)
             {
                 //play a goal sound
                 soundEffects[2].Play();
+
+                //increment the score
+                leftPaddleScore = rightPaddleScore + 1;
+                leftScoreTexture = scoreCards[leftPaddleScore];
+
                 //move ball to the middle of the screen
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                 ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
@@ -118,10 +147,12 @@ namespace Pong
             }
 
             //check for a goal
-            if (ballPosition.X < 0 || ballPosition.X > _graphics.PreferredBackBufferWidth)
+            if (ballPosition.X > _graphics.PreferredBackBufferWidth)
             {
                 //play a goal sound
                 soundEffects[2].Play();
+                rightPaddleScore = rightPaddleScore + 1;
+                rightScoreTexture = scoreCards[rightPaddleScore];
                 //move ball to the middle of the screen
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                 ballPosition.Y = _graphics.PreferredBackBufferHeight / 2;
@@ -154,6 +185,7 @@ namespace Pong
             {
                 ballPosition.Y += (ballSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
             }
+
 
             base.Update(gameTime);
         }
@@ -195,6 +227,30 @@ namespace Pong
                 Color.White,
                 0f,
                 new Vector2(rightPaddleTexture.Width, rightPaddleTexture.Height / 2),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
+            _spriteBatch.Draw(
+                leftScoreTexture,
+                leftScorePosition,
+                null,
+                Color.White,
+                0f,
+                new Vector2(0, 0),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+  
+            _spriteBatch.Draw(
+                rightScoreTexture,
+                rightScorePosition,
+                null,
+                Color.White,
+                0f,
+                new Vector2(0, 0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
