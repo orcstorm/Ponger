@@ -50,7 +50,7 @@ namespace Pong
             // TODO: Add your initialization logic here
             ballHDirection = true;
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 1600f;
+            ballSpeed = 1800f;
             paddlePosition = new Vector2(0, _graphics.PreferredBackBufferHeight / 2);
             paddleSpeed = 1000f;
             PongerPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2 , 0);
@@ -70,7 +70,7 @@ namespace Pong
             winningScore = 5;
             leftScorePosition = new Vector2(5, 5);
             rightScorePosition = new Vector2(_graphics.PreferredBackBufferWidth, 5);
-            isGameWon = false;
+            isGameWon = true;
             rand = new Random();
             Ydivisor = (float)(rand.NextDouble() * 4d);
 
@@ -118,7 +118,10 @@ namespace Pong
 
             if (isGameWon == true)
             {
-                ballPosition.Y = (float)(rand.NextDouble() * _graphics.PreferredBackBufferHeight);
+                if (gameTime.TotalGameTime.Ticks % 8m == 0m)
+                {
+                    ballPosition.Y = (float)(rand.NextDouble() * _graphics.PreferredBackBufferHeight);
+                }
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                 rightPaddlePosition.Y = _graphics.PreferredBackBufferHeight / 2;
                 if(Keyboard.GetState().IsKeyDown(Keys.R)) {
@@ -232,6 +235,19 @@ namespace Pong
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
+
+            _spriteBatch.Draw(
+                PongerTexture,
+                PongerPosition,
+                null,
+                Color.White,
+                0f,
+                new Vector2(PongerTexture.Width / 2, 0),
+                Vector2.One,
+                SpriteEffects.None,
+                0f
+            );
+
             _spriteBatch.Draw(
                 ballTexture,
                 ballPosition,
@@ -292,17 +308,7 @@ namespace Pong
                 0f
             );
 
-            _spriteBatch.Draw(
-                PongerTexture,
-                PongerPosition,
-                null,
-                Color.White,
-                0f,
-                new Vector2(PongerTexture.Width / 2, 0),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+
 
             _spriteBatch.End();
 
