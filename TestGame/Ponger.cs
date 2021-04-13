@@ -15,10 +15,12 @@ namespace Pong
         Texture2D paddleTexture;
         Texture2D rightPaddleTexture;
         Texture2D PongerTexture;
+        Texture2D startTexture;
         Vector2 ballPosition;
         Vector2 paddlePosition;
         Vector2 rightPaddlePosition;
         Vector2 PongerPosition;
+        Vector2 startPosition;
         float ballSpeed;
         float paddleSpeed;
         bool ballHDirection;
@@ -35,6 +37,7 @@ namespace Pong
         Texture2D rightScoreTexture;
         float Ydivisor;
         Random rand;
+        bool titleOn;
 
         public PongGame()
         {
@@ -50,6 +53,7 @@ namespace Pong
             // TODO: Add your initialization logic here
             ballHDirection = true;
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+            startPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
             ballSpeed = 1800f;
             paddlePosition = new Vector2(0, _graphics.PreferredBackBufferHeight / 2);
             paddleSpeed = 1000f;
@@ -73,7 +77,7 @@ namespace Pong
             isGameWon = true;
             rand = new Random();
             Ydivisor = (float)(rand.NextDouble() * 4d);
-
+            titleOn = true;
             base.Initialize();
         }
 
@@ -84,6 +88,7 @@ namespace Pong
             paddleTexture = Content.Load<Texture2D>("paddle");
             rightPaddleTexture = Content.Load<Texture2D>("paddle");
             PongerTexture = Content.Load<Texture2D>("ponger");
+            startTexture = Content.Load<Texture2D>("start");
             leftScoreTexture = scoreCards[0];
             rightScoreTexture = scoreCards[0];
         }
@@ -118,13 +123,27 @@ namespace Pong
 
             if (isGameWon == true)
             {
+                // Place the ball at a random Y value some of the time. 
                 if (gameTime.TotalGameTime.Ticks % 8m == 0m)
                 {
                     ballPosition.Y = (float)(rand.NextDouble() * _graphics.PreferredBackBufferHeight);
                 }
+
+                if (gameTime.TotalGameTime.Ticks % 60m == 0m)
+                {
+                    soundEffects[0].Play();
+                    if (titleOn == true)
+                    {
+                        titleOn = false;
+                    } else
+                    {
+                        titleOn = true;
+                    }
+                }
+
                 ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                 rightPaddlePosition.Y = _graphics.PreferredBackBufferHeight / 2;
-                if(Keyboard.GetState().IsKeyDown(Keys.R)) {
+                if(Keyboard.GetState().IsKeyDown(Keys.Space)) {
                     Reset(gameTime);
                 }
                 base.Update(gameTime);
@@ -132,7 +151,7 @@ namespace Pong
             else
             {
 
-
+                titleOn = false;
                 //ball Xposition
                 //check for collision with left paddle, and if so reverse the direction
                 if ((ballPosition.Y <= paddlePosition.Y + paddleTexture.Height / 2) && (ballPosition.Y >= paddlePosition.Y - paddleTexture.Height))
@@ -236,17 +255,20 @@ namespace Pong
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            _spriteBatch.Draw(
-                PongerTexture,
-                PongerPosition,
-                null,
-                Color.White,
-                0f,
-                new Vector2(PongerTexture.Width / 2, 0),
-                Vector2.One,
-                SpriteEffects.None,
-                0f
-            );
+            if (titleOn == true)
+            {
+                _spriteBatch.Draw(
+                    PongerTexture,
+                    PongerPosition,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(PongerTexture.Width / 2, 0),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
 
             _spriteBatch.Draw(
                 ballTexture,
@@ -308,9 +330,24 @@ namespace Pong
                 0f
             );
 
+            if (isGameWon == true)
+            {
+                _spriteBatch.Draw(
+                    startTexture,
+                    startPosition,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(startTexture.Width / 2, startTexture.Height / 2),
+                    Vector2.One,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
 
 
-            _spriteBatch.End();
+
+                _spriteBatch.End();
 
             base.Draw(gameTime);
         }
