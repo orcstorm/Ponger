@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Threading;
 
 namespace Pong
 {
@@ -38,6 +39,8 @@ namespace Pong
         float Ydivisor;
         Random rand;
         bool titleOn;
+        bool Pause;
+        int PauseCounter;
 
         public PongGame()
         {
@@ -54,7 +57,7 @@ namespace Pong
             ballHDirection = true;
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
             startPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-            ballSpeed = 1800f;
+            ballSpeed = 1750f;
             paddlePosition = new Vector2(0, _graphics.PreferredBackBufferHeight / 2);
             paddleSpeed = 1000f;
             PongerPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2 , 0);
@@ -78,6 +81,8 @@ namespace Pong
             rand = new Random();
             Ydivisor = (float)(rand.NextDouble() * 4d);
             titleOn = true;
+            Pause = false;
+            PauseCounter = 0;
             base.Initialize();
         }
 
@@ -85,8 +90,8 @@ namespace Pong
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             ballTexture = Content.Load<Texture2D>("orange_square");
-            paddleTexture = Content.Load<Texture2D>("paddle");
-            rightPaddleTexture = Content.Load<Texture2D>("paddle");
+            paddleTexture = Content.Load<Texture2D>("paddlev2");
+            rightPaddleTexture = Content.Load<Texture2D>("paddlev2");
             PongerTexture = Content.Load<Texture2D>("ponger");
             startTexture = Content.Load<Texture2D>("start");
             leftScoreTexture = scoreCards[0];
@@ -124,7 +129,7 @@ namespace Pong
             if (isGameWon == true)
             {
                 // Place the ball at a random Y value some of the time. 
-                if (gameTime.TotalGameTime.Ticks % 8m == 0m)
+                if (gameTime.TotalGameTime.Ticks % 2m == 0m)
                 {
                     ballPosition.Y = (float)(rand.NextDouble() * _graphics.PreferredBackBufferHeight);
                 }
@@ -146,8 +151,32 @@ namespace Pong
                 if(Keyboard.GetState().IsKeyDown(Keys.Space)) {
                     Reset(gameTime);
                 }
+
+                Pause = true;
                 base.Update(gameTime);
             }
+
+            //The Game is paused for 30 frames between goals
+            else if (Pause == true)
+            {
+                PauseCounter = PauseCounter + 1;
+                if(PauseCounter > 30) {
+                    PauseCounter = 0;
+                    Pause = false;
+                    int coinToss = rand.Next(2);
+                    if (coinToss == 0)
+                    {
+                        ballHDirection = true;
+                    }
+                    else
+                    {
+                        ballHDirection = false;
+                    }
+                    ballSpeed = 1000;
+                }
+                base.Update(gameTime);
+            }
+
             else
             {
 
@@ -161,6 +190,7 @@ namespace Pong
                         soundEffects[3].Play();
                         Ydivisor = (float)rand.NextDouble() * 2.0f;
                         ballHDirection = false;
+                        ballSpeed = ballSpeed + 100f;
                     }
                 }
 
@@ -177,7 +207,7 @@ namespace Pong
                     //move ball to the middle of the screen
                     ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                     ballPosition.Y = (float)(rand.NextDouble()) * _graphics.PreferredBackBufferHeight;
-
+                    Pause = true;
                     if (rightPaddleScore == winningScore)
                     {
                         isGameWon = true;
@@ -192,6 +222,7 @@ namespace Pong
                         soundEffects[3].Play();
                         Ydivisor = (float)rand.NextDouble() * 2.0f;
                         ballHDirection = true;
+                        ballSpeed = ballSpeed + 100f;
                     }
                 }
 
@@ -205,7 +236,7 @@ namespace Pong
                     //move ball to the middle of the screen
                     ballPosition.X = _graphics.PreferredBackBufferWidth / 2;
                     ballPosition.Y = (float)(rand.NextDouble()) * _graphics.PreferredBackBufferHeight;
-
+                    Pause = true;
                     if (leftPaddleScore == winningScore)
                     {
                         isGameWon = true;
@@ -324,7 +355,7 @@ namespace Pong
                 null,
                 Color.White,
                 0f,
-                new Vector2(rightPaddleTexture.Width + 5, 0),
+                new Vector2(rightScoreTexture.Width + 5f, 0),
                 Vector2.One,
                 SpriteEffects.None,
                 0f
@@ -359,6 +390,7 @@ namespace Pong
             leftScoreTexture = scoreCards[0];
             ballPosition = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
             isGameWon = false;
+
             base.Update(gameTime);
         }
     }
